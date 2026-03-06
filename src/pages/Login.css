@@ -1,0 +1,211 @@
+.login-container {
+    width: 100vw;
+    height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: radial-gradient(circle at 15% 50%, rgba(59, 130, 246, 0.1), transparent 30%),
+        radial-gradient(circle at 85% 30%, rgba(16, 185, 129, 0.08), transparent 30%),
+        var(--bg-color);
+}
+
+.login-box {
+    width: min(500px, 95vw);
+    padding: 2.5rem;
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+    text-align: center;
+}
+
+.login-header h1 {
+    font-size: 2rem;
+    font-weight: 800;
+    letter-spacing: -0.02em;
+    margin: 0.5rem 0;
+}
+
+.user-selection-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1rem;
+    max-height: 400px;
+    overflow-y: auto;
+    padding: 0.5rem;
+}
+
+.user-card {
+    padding: 1.5rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1rem;
+    cursor: pointer;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid var(--panel-border);
+}
+
+.user-card:hover {
+    background: rgba(255, 255, 255, 0.08);
+    border-color: var(--primary-color);
+    transform: translateY(-4px);
+}
+
+.user-role-icon {
+    width: 54px;
+    height: 54px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(255, 255, 255, 0.05);
+}
+
+.user-role-icon.admin {
+    color: #3b82f6;
+    background: rgba(59, 130, 246, 0.15);
+}
+
+.user-role-icon.cocina {
+    color: #f59e0b;
+    background: rgba(245, 158, 11, 0.15);
+}
+
+.user-role-icon.cajero {
+    color: #10b981;
+    background: rgba(16, 185, 129, 0.15);
+}
+
+.user-name {
+    font-weight: 700;
+    font-size: 1.1rem;
+}
+
+.user-role-tag {
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    font-weight: 600;
+    letter-spacing: 0.05em;
+}
+
+/* PIN Entry View */
+.pin-entry-view {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1.5rem;
+}
+
+.back-btn {
+    align-self: flex-start;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    background: transparent;
+    border: none;
+    color: var(--text-muted);
+    font-size: 0.875rem;
+    cursor: pointer;
+    padding: 0;
+}
+
+.back-btn:hover {
+    color: var(--text-primary);
+}
+
+.selected-user-header {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.25rem;
+}
+
+.pin-display {
+    display: flex;
+    gap: 1rem;
+    padding: 1rem;
+}
+
+.pin-dot {
+    width: 14px;
+    height: 14px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid var(--panel-border);
+    transition: all 0.1s;
+}
+
+.pin-dot.filled {
+    background: var(--primary-color);
+    transform: scale(1.2);
+    box-shadow: 0 0 10px rgba(59, 130, 246, 0.5);
+}
+
+.pin-pad {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 0.75rem;
+    width: 250px;
+}
+
+.pin-key {
+    aspect-ratio: 1/1;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid var(--panel-border);
+    color: var(--text-primary);
+    font-size: 1.25rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.1s;
+    padding: 0;
+}
+
+.pin-key:hover {
+    background: rgba(255, 255, 255, 0.15);
+    border-color: rgba(255, 255, 255, 0.3);
+}
+
+.pin-key:active {
+    transform: scale(0.9);
+}
+
+.pin-key.special {
+    font-size: 0.9rem;
+    color: var(--text-secondary);
+    background: rgba(255, 255, 255, 0.03);
+}
+
+.pin-key:nth-child(12) {
+    color: #3b82f6;
+    border-color: rgba(59, 130, 246, 0.3);
+}
+
+/* User role colors */
+.text-admin {
+    color: #3b82f6;
+}
+
+.text-cocina {
+    color: #f59e0b;
+}
+
+.text-cajero {
+    color: #10b981;
+}
+
+@media (max-width: 480px) {
+    .login-box {
+        padding: 1.5rem;
+    }
+
+    .user-selection-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .pin-pad {
+        width: 220px;
+    }
+}

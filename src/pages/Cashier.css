@@ -1,0 +1,189 @@
+.cashier-layout {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    overflow: hidden;
+}
+
+.cashier-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 1.5rem 2rem;
+    border-bottom: 1px solid var(--panel-border);
+    flex-shrink: 0;
+}
+
+.cashier-title-group {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.cashier-title-group h1 {
+    font-size: 1.75rem;
+    font-weight: 700;
+    margin: 0;
+}
+
+.cashier-header-actions {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.ready-alert {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.5rem 1rem;
+    background: rgba(16, 185, 129, 0.15);
+    border: 1px solid rgba(16, 185, 129, 0.4);
+    border-radius: 9999px;
+    color: #34d399;
+    font-weight: 700;
+    font-size: 0.9rem;
+    animation: pulse-green 2s infinite;
+}
+
+@keyframes pulse-green {
+
+    0%,
+    100% {
+        box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.4);
+    }
+
+    50% {
+        box-shadow: 0 0 0 8px rgba(16, 185, 129, 0);
+    }
+}
+
+.cashier-loading {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.cashier-content {
+    flex: 1;
+    overflow-y: auto;
+    padding: 1.5rem 2rem;
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+}
+
+.cashier-empty {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 1rem;
+    color: var(--text-secondary);
+    opacity: 0.5;
+}
+
+.cashier-section {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
+.section-title {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    font-size: 1.1rem;
+    font-weight: 700;
+    margin: 0;
+}
+
+.section-count {
+    background: rgba(255, 255, 255, 0.08);
+    border-radius: 9999px;
+    padding: 0.1rem 0.6rem;
+    font-size: 0.85rem;
+}
+
+.ready-title {
+    color: #34d399;
+}
+
+.preparing-title {
+    color: #fbbf24;
+}
+
+.delivered-title {
+    color: var(--text-secondary);
+}
+
+.cashier-rows {
+    display: flex;
+    flex-direction: column;
+    gap: 0.6rem;
+}
+
+/* Row card */
+.cashier-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr auto;
+    align-items: center;
+    gap: 1rem;
+    padding: 1rem 1.25rem;
+    border-radius: var(--radius-lg);
+    background: var(--panel-bg);
+    border: 1px solid var(--panel-border);
+    transition: background 0.2s;
+}
+
+.cashier-row.lista {
+    border-color: rgba(16, 185, 129, 0.35);
+    background: rgba(16, 185, 129, 0.05);
+}
+
+.cashier-row.entregada {
+    opacity: 0.45;
+}
+
+.cashier-row-id {
+    display: flex;
+    flex-direction: column;
+    gap: 0.2rem;
+}
+
+.cashier-uid {
+    font-weight: 700;
+    font-size: 1rem;
+    color: var(--text-primary);
+    letter-spacing: 0.05em;
+}
+
+.cashier-time {
+    font-size: 0.78rem;
+    color: var(--text-secondary);
+}
+
+.cashier-row-meta {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+    align-items: flex-start;
+}
+
+.cashier-amount {
+    font-weight: 700;
+    font-size: 1.1rem;
+    color: var(--text-primary);
+}
+
+.payment-chip {
+    font-size: 0.75rem;
+    color: var(--text-secondary);
+}
+
+.cashier-row-status {
+    display: flex;
+    justify-content: flex-end;
+}
