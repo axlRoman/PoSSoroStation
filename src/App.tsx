@@ -7,6 +7,7 @@ import PointOfSale from './pages/PointOfSale';
 import Kitchen from './pages/Kitchen';
 import Cashier from './pages/Cashier';
 import MenuManager from './pages/MenuManager';
+import Settings from './pages/Settings';
 import Login from './pages/Login';
 
 // Helper component for protected routes
@@ -41,6 +42,7 @@ function App() {
               <Route path="kitchen" element={<Kitchen />} />
               <Route path="cashier" element={<Cashier />} />
               <Route path="menu" element={<MenuManager />} />
+              <Route path="settings" element={<Settings />} />
               <Route path="*" element={<Navigate to="/pos" replace />} />
             </Route>
           </Route>

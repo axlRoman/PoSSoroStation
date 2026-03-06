@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
-    Users, Lock, Loader2, ChefHat,
+    Users, Loader2, ChefHat,
     ShoppingCart, ShieldCheck, UserCircle
 } from 'lucide-react';
 import { supabase } from '../lib/supabase';
@@ -35,21 +35,34 @@ const Login = () => {
 
             if (error) {
                 toast.error('Error cargando usuarios. Verifica la base de datos.');
-            } else {
-                setUsers(data || []);
+            } else if (data) {
+                const rolePriority = { cajero: 1, cocina: 2, admin: 3 };
+                const sorted = [...data].sort((a, b) => {
+                    const pA = rolePriority[a.role as keyof typeof rolePriority] || 99;
+                    const pB = rolePriority[b.role as keyof typeof rolePriority] || 99;
+                    if (pA !== pB) return pA - pB;
+                    return a.username.localeCompare(b.username);
+                });
+                setUsers(sorted);
             }
             setIsLoading(false);
         };
         fetchUsers();
     }, []);
 
+    useEffect(() => {
+        if (pin.length === 4 && selectedUser) {
+            handleLogin();
+        }
+    }, [pin, selectedUser]);
+
     const handleLogin = async (e?: React.FormEvent) => {
         if (e) e.preventDefault();
-        if (!selectedUser) return;
+        if (!selectedUser || pin.length < 4) return;
 
         if (pin === selectedUser.pin_code) {
             setIsLoggingIn(true);
-            setRole(selectedUser.role);
+            setRole(selectedUser.role, selectedUser.username);
 
             // Store simple auth in local storage
             localStorage.setItem('soro_user', JSON.stringify({

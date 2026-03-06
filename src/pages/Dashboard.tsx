@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect } from 'react';
 import { TrendingUp, Users, ShoppingBag, DollarSign, Calendar, Trash2 } from 'lucide-react';
 import {
     Chart as ChartJS,
@@ -62,6 +62,7 @@ interface Order {
     created_at: string;
     total: number;
     status: string;
+    attended_by?: string;
 }
 
 const getLast7Days = () => {
@@ -92,7 +93,7 @@ const Dashboard = () => {
 
         const { data: dbOrders, error } = await supabase
             .from('orders')
-            .select('id, created_at, total, status')
+            .select('id, created_at, total, status, attended_by')
             .gte('created_at', fourteenDaysAgo.toISOString())
             .order('created_at', { ascending: false });
 
@@ -299,6 +300,7 @@ const Dashboard = () => {
                             <thead>
                                 <tr>
                                     <th>Orden UID</th>
+                                    <th>Cajero</th>
                                     <th>Total</th>
                                     <th className="text-right">Acciones</th>
                                 </tr>
@@ -309,6 +311,9 @@ const Dashboard = () => {
                                         <td className="font-medium text-white">
                                             {order.id.substring(0, 8).toUpperCase()} <br />
                                             <span className="text-secondary text-xs">{formatTime(order.created_at)}</span>
+                                        </td>
+                                        <td className="text-secondary text-sm">
+                                            {order.attended_by || 'Sistema'}
                                         </td>
                                         <td className="font-bold text-white">{formatCurrency(order.total)}</td>
                                         <td className="text-right">
@@ -336,7 +341,7 @@ const Dashboard = () => {
                                 ))}
                                 {orders.length === 0 && (
                                     <tr>
-                                        <td colSpan={3} className="text-center p-4 text-secondary">Aún no hay órdenes.</td>
+                                        <td colSpan={4} className="text-center p-4 text-secondary">Aún no hay órdenes.</td>
                                     </tr>
                                 )}
                             </tbody>

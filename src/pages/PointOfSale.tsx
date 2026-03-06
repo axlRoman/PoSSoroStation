@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { Search, Plus, Minus, Trash2, CreditCard, Banknote, Printer, ShoppingCart, Loader2 } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { supabase } from '../lib/supabase';
+import { useRole } from '../context/RoleContext';
 import './PointOfSale.css';
 
 interface Product {
@@ -18,6 +19,13 @@ interface CartItem extends Product {
     quantity: number;
 }
 
+interface BusinessSettings {
+    name: string;
+    address: string;
+    phone: string;
+    branch_name: string;
+}
+
 const PointOfSale = () => {
     const [products, setProducts] = useState<Product[]>([]);
     const [categories, setCategories] = useState<string[]>(['Todos']);
@@ -32,6 +40,14 @@ const PointOfSale = () => {
     const [currentDateTime, setCurrentDateTime] = useState('');
     const [lastSoldItems, setLastSoldItems] = useState<CartItem[]>([]);
     const [lastSoldTotal, setLastSoldTotal] = useState(0);
+    const [business, setBusiness] = useState<BusinessSettings>({
+        name: 'Soro Station',
+        address: '',
+        phone: '',
+        branch_name: 'Sucursal Principal'
+    });
+
+    const { currentUser } = useRole();
 
     useEffect(() => {
         const fetchData = async () => {
@@ -55,6 +71,18 @@ const PointOfSale = () => {
             } else if (prodData) {
                 setProducts(prodData);
             }
+
+            // Fetch Business Settings
+            const { data: bData } = await supabase
+                .from('business_settings')
+                .select('*')
+                .limit(1)
+                .single();
+
+            if (bData) {
+                setBusiness(bData);
+            }
+
             setIsLoading(false);
         };
         fetchData();
@@ -136,7 +164,8 @@ const PointOfSale = () => {
                 status: 'preparando',
                 transaction_code: folio,
                 amount_received: received,
-                change_given: change
+                change_given: change,
+                attended_by: currentUser?.name
             })
             .select()
             .single();
@@ -261,9 +290,13 @@ const PointOfSale = () => {
             <div className="print-area">
                 <div className="ticket-58mm">
                     <div className="ticket-header">
-                        <h1 className="ticket-brand">SORO STATION</h1>
-                        <p className="ticket-info">Sucursal Centro</p>
+                        <h1 className="ticket-brand">{business.name.toUpperCase()}</h1>
+                        {business.branch_name && <p className="ticket-info">{business.branch_name}</p>}
+                        {business.address && <p className="ticket-info">{business.address}</p>}
+                        {business.phone && <p className="ticket-info">Tel: {business.phone}</p>}
+                        <div className="ticket-divider">--------------------------------</div>
                         <p className="ticket-info">{currentDateTime}</p>
+                        <p className="ticket-info">Atendió: {currentUser?.name}</p>
                     </div>
 
                     <div className="ticket-divider">********************************</div>
