@@ -37,6 +37,11 @@ const Cashier = () => {
         setIsLoading(false);
     }, []);
 
+    const playOrderReadySound = () => {
+        const audio = new Audio('https://assets.mixkit.co/active_storage/sfx/2571/2571-preview.mp3');
+        audio.play().catch(e => console.log('Audio play blocked:', e));
+    };
+
     useEffect(() => {
         fetchOrders();
 
@@ -47,10 +52,15 @@ const Cashier = () => {
                 schema: 'public',
                 table: 'orders'
             }, (payload) => {
-                // If an order was updated/inserted and now it's 'lista', show notification
-                if (payload.new && (payload.new as CashierOrder).status === 'lista') {
+                // Check if a row changed to 'lista'
+                const isNewlyReady = payload.eventType === 'UPDATE' &&
+                    payload.old && (payload.old as CashierOrder).status === 'preparando' &&
+                    payload.new && (payload.new as CashierOrder).status === 'lista';
+
+                if (isNewlyReady) {
+                    playOrderReadySound();
                     setNewReadyCount(prev => prev + 1);
-                    toast.success('¡Orden lista para entregar! 🔔', { duration: 4000, icon: '🍽️' });
+                    toast.success('¡Orden lista para entregar! 🔔', { duration: 5000, icon: '🍽️' });
                 }
                 fetchOrders();
             })

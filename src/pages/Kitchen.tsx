@@ -135,6 +135,11 @@ const Kitchen = () => {
         setIsLoading(false);
     }, []);
 
+    const playNewOrderSound = () => {
+        const audio = new Audio('https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3');
+        audio.play().catch(e => console.log('Audio play blocked:', e));
+    };
+
     useEffect(() => {
         fetchOrders();
 
@@ -142,7 +147,11 @@ const Kitchen = () => {
             .channel('kitchen-orders-v2')
             .on('postgres_changes', {
                 event: '*', schema: 'public', table: 'orders'
-            }, () => {
+            }, (payload) => {
+                if (payload.eventType === 'INSERT') {
+                    playNewOrderSound();
+                    toast('🔔 ¡Nueva orden recibida!', { icon: '👨‍🍳', duration: 5000 });
+                }
                 fetchOrders();
             })
             .subscribe();
