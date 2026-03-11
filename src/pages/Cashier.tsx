@@ -14,7 +14,7 @@ interface CashierOrder {
     order_items: {
         quantity: number;
         customizations?: any[];
-        products: { name: string; description: string | null } | null;
+        products: any; // Supabase joined products can be object or array
     }[];
 }
 
@@ -41,7 +41,7 @@ const Cashier = () => {
         if (error) {
             toast.error('Error cargando órdenes');
         } else {
-            setOrders((data as CashierOrder[]) || []);
+            setOrders((data as unknown as CashierOrder[]) || []);
         }
         setIsLoading(false);
     }, []);
@@ -152,7 +152,9 @@ const Cashier = () => {
                                 <div key={idx} className="details-item-row">
                                     <div className="item-main">
                                         <span className="item-qty">{item.quantity}x</span>
-                                        <span className="item-name">{item.products?.name}</span>
+                                        <span className="item-name">
+                                            {Array.isArray(item.products) ? item.products[0]?.name : item.products?.name}
+                                        </span>
                                     </div>
                                     {item.customizations && item.customizations.length > 0 && (
                                         <div className="item-addons">
@@ -163,9 +165,9 @@ const Cashier = () => {
                                             ))}
                                         </div>
                                     )}
-                                    {item.products?.description && (
+                                    {item.products && (
                                         <div className="item-desc">
-                                            {item.products.description}
+                                            {Array.isArray(item.products) ? item.products[0]?.description : item.products.description}
                                         </div>
                                     )}
                                 </div>

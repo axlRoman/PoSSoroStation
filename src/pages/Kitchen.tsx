@@ -8,7 +8,7 @@ interface OrderItem {
     quantity: number;
     price_at_time: number;
     customizations?: any[];
-    products: { name: string; image: string; description: string | null } | null;
+    products: any; // Can be object or array from Supabase join
 }
 
 interface KanbanOrder {
@@ -82,7 +82,9 @@ const OrderCard = ({
                         <div key={i} className="kanban-item-block">
                             <div className="kanban-item-row">
                                 <span className="kanban-item-qty">{item.quantity}x</span>
-                                <span className="kanban-item-name">{item.products?.name ?? 'Producto'}</span>
+                                <span className="kanban-item-name">
+                                    {Array.isArray(item.products) ? item.products[0]?.name : item.products?.name ?? 'Producto'}
+                                </span>
                             </div>
                             {item.customizations && item.customizations.length > 0 && (
                                 <div className="kanban-item-customs">
@@ -96,9 +98,9 @@ const OrderCard = ({
                                     })}
                                 </div>
                             )}
-                            {item.products?.description && (
+                            {item.products && (
                                 <div className="kanban-item-description">
-                                    {item.products.description}
+                                    {Array.isArray(item.products) ? item.products[0]?.description : item.products.description}
                                 </div>
                             )}
                         </div>
