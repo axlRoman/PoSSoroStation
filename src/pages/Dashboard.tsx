@@ -63,6 +63,7 @@ interface Order {
     total: number;
     status: string;
     attended_by?: string;
+    order_number: number;
 }
 
 const getLast7Days = () => {
@@ -93,7 +94,7 @@ const Dashboard = () => {
 
         const { data: dbOrders, error } = await supabase
             .from('orders')
-            .select('id, created_at, total, status, attended_by')
+            .select('id, created_at, total, status, attended_by, order_number')
             .gte('created_at', fourteenDaysAgo.toISOString())
             .order('created_at', { ascending: false });
 
@@ -299,7 +300,8 @@ const Dashboard = () => {
                         <table className="orders-table w-full">
                             <thead>
                                 <tr>
-                                    <th>Orden UID</th>
+                                    <th className="w-16">No. Orden</th>
+                                    <th>Folio UID</th>
                                     <th>Cajero</th>
                                     <th>Total</th>
                                     <th className="text-right">Acciones</th>
@@ -308,9 +310,12 @@ const Dashboard = () => {
                             <tbody>
                                 {orders.map((order) => (
                                     <tr key={order.id}>
+                                        <td className="font-bold text-white text-lg">
+                                            #{order.order_number || order.id.substring(0, 4).toUpperCase()}
+                                        </td>
                                         <td className="font-medium text-white">
-                                            {order.id.substring(0, 8).toUpperCase()} <br />
-                                            <span className="text-secondary text-xs">{formatTime(order.created_at)}</span>
+                                            <span className="text-secondary text-xs">{order.id.substring(0, 8).toUpperCase()}</span> <br />
+                                            <span className="text-secondary text-[10px]">{formatTime(order.created_at)}</span>
                                         </td>
                                         <td className="text-secondary text-sm">
                                             {order.attended_by || 'Sistema'}

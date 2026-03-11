@@ -18,6 +18,8 @@ interface Product {
     description: string | null;
     discount_pct: number | null;
     is_active: boolean;
+    requires_sauce: boolean;
+    includes_drink: boolean;
 }
 
 interface Category {
@@ -37,6 +39,8 @@ const emptyForm = (): Omit<Product, 'id'> => ({
     description: '',
     discount_pct: null,
     is_active: true,
+    requires_sauce: false,
+    includes_drink: false,
 });
 
 const MenuManager = () => {
@@ -109,6 +113,8 @@ const MenuManager = () => {
             description: p.description ?? '',
             discount_pct: p.discount_pct,
             is_active: p.is_active,
+            requires_sauce: p.requires_sauce ?? false,
+            includes_drink: p.includes_drink ?? false,
         });
         setImageType(p.image_url ? 'url' : 'emoji');
         setShowModal(true);
@@ -135,6 +141,8 @@ const MenuManager = () => {
             description: form.description?.trim() || null,
             discount_pct: form.discount_pct ? Number(form.discount_pct) : null,
             is_active: form.is_active,
+            requires_sauce: form.requires_sauce,
+            includes_drink: form.includes_drink,
         };
 
         if (editingProduct) {
@@ -464,6 +472,48 @@ const MenuManager = () => {
                                         ) : (
                                             <span>Final: <strong>${form.price.toFixed(2)}</strong></span>
                                         )}
+                                    </div>
+                                    <div className="input-group">
+                                        <label className="input-label">Opciones de Personalización</label>
+                                        <div className="flex flex-col gap-3 mt-2">
+                                            <div className="flex items-center justify-between p-3 glass-panel rounded-lg">
+                                                <div className="flex items-center gap-2">
+                                                    <Utensils size={16} className="text-primary" />
+                                                    <div>
+                                                        <span className="text-sm font-semibold">Requiere Salsa</span>
+                                                        <p className="text-[10px] text-secondary">Abre el selector de salsas en Caja</p>
+                                                    </div>
+                                                </div>
+                                                <button
+                                                    type="button"
+                                                    className="active-toggle"
+                                                    onClick={() => setForm(f => ({ ...f, requires_sauce: !f.requires_sauce }))}
+                                                >
+                                                    {form.requires_sauce
+                                                        ? <ToggleRight size={28} color="#10b981" />
+                                                        : <ToggleLeft size={28} color="#64748b" />}
+                                                </button>
+                                            </div>
+
+                                            <div className="flex items-center justify-between p-3 glass-panel rounded-lg">
+                                                <div className="flex items-center gap-2">
+                                                    <LayoutList size={16} className="text-primary" />
+                                                    <div>
+                                                        <span className="text-sm font-semibold">Incluye Bebida</span>
+                                                        <p className="text-[10px] text-secondary">Abre el selector de bebidas en Caja</p>
+                                                    </div>
+                                                </div>
+                                                <button
+                                                    type="button"
+                                                    className="active-toggle"
+                                                    onClick={() => setForm(f => ({ ...f, includes_drink: !f.includes_drink }))}
+                                                >
+                                                    {form.includes_drink
+                                                        ? <ToggleRight size={28} color="#10b981" />
+                                                        : <ToggleLeft size={28} color="#64748b" />}
+                                                </button>
+                                            </div>
+                                        </div>
                                     </div>
                                 </div>
 

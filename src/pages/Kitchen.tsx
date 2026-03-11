@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
-import { ChefHat, CheckCircle2, Loader2, RefreshCw, ChevronDown, ChevronUp } from 'lucide-react';
+import { ChefHat, CheckCircle2, Loader2, RefreshCw, ChevronDown, ChevronUp, Package } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import toast from 'react-hot-toast';
 import './Kitchen.css';
@@ -7,6 +7,7 @@ import './Kitchen.css';
 interface OrderItem {
     quantity: number;
     price_at_time: number;
+    customizations?: any[];
     products: { name: string; image: string; description: string | null } | null;
 }
 
@@ -15,6 +16,7 @@ interface KanbanOrder {
     created_at: string;
     status: string;
     total: number;
+    order_number: number;
     order_items: OrderItem[];
 }
 
@@ -50,15 +52,15 @@ const OrderCard = ({
     updatingId: string | null;
     onMoveToLista: (id: string) => void;
 }) => {
-    const [expanded, setExpanded] = useState(true);
+    const [expanded, setExpanded] = useState(false);
     const elapsed = useElapsed(order.created_at);
     const isUrgent = (Date.now() - new Date(order.created_at).getTime()) > 10 * 60 * 1000; // >10 min = urgent
 
     return (
         <div className={`kanban-card glass-panel ${isUrgent && showAction ? 'kanban-urgent' : ''}`}>
-            <div className="kanban-card-header">
+            <div className="kanban-card-header" onClick={() => setExpanded(e => !e)} style={{ cursor: 'pointer' }}>
                 <div className="kanban-card-title">
-                    <span className="kanban-order-id">#{order.id.substring(0, 8).toUpperCase()}</span>
+                    <span className="kanban-order-id">ORDEN #{order.order_number || order.id.substring(0, 4).toUpperCase()}</span>
                     {isUrgent && showAction && <span className="urgent-badge">⚡ Urgente</span>}
                 </div>
                 <div className="kanban-card-meta">
@@ -82,6 +84,18 @@ const OrderCard = ({
                                 <span className="kanban-item-qty">{item.quantity}x</span>
                                 <span className="kanban-item-name">{item.products?.name ?? 'Producto'}</span>
                             </div>
+                            {item.customizations && item.customizations.length > 0 && (
+                                <div className="kanban-item-customs">
+                                    {item.customizations.map((c: any, ci: number) => {
+                                        const isExtra = c.name.includes('(EXTRA)');
+                                        return (
+                                            <div key={ci} className={`kanban-custom-pill ${isExtra ? 'extra' : ''}`}>
+                                                {c.name}
+                                            </div>
+                                        );
+                                    })}
+                                </div>
+                            )}
                             {item.products?.description && (
                                 <div className="kanban-item-description">
                                     {item.products.description}
@@ -115,13 +129,14 @@ const Kitchen = () => {
     const [orders, setOrders] = useState<KanbanOrder[]>([]);
     const [isLoading, setIsLoading] = useState(true);
     const [updatingId, setUpdatingId] = useState<string | null>(null);
+    const [activeTab, setActiveTab] = useState<'preparando' | 'lista'>('preparando');
 
     const fetchOrders = useCallback(async () => {
         const { data, error } = await supabase
             .from('orders')
             .select(`
-                id, created_at, status, total,
-                order_items (quantity, price_at_time, products (name, image, description))
+                id, created_at, status, total, order_number,
+                order_items (quantity, price_at_time, customizations, products (name, image, description))
             `)
             .in('status', ['preparando', 'lista'])
             .order('created_at', { ascending: true });
@@ -197,12 +212,22 @@ const Kitchen = () => {
                     </div>
                 </div>
                 <div className="kitchen-header-right">
-                    <div className="kitchen-stats">
-                        <span className="stat-chip preparing-chip">⏳ {preparando.length} preparando</span>
-                        <span className="stat-chip ready-chip">✅ {listas.length} listas</span>
+                    <div className="kitchen-tabs">
+                        <button 
+                            className={`tab-btn ${activeTab === 'preparando' ? 'active' : ''}`}
+                            onClick={() => setActiveTab('preparando')}
+                        >
+                            ⏳ Preparando ({preparando.length})
+                        </button>
+                        <button 
+                            className={`tab-btn ${activeTab === 'lista' ? 'active' : ''}`}
+                            onClick={() => setActiveTab('lista')}
+                        >
+                            ✅ Listas ({listas.length})
+                        </button>
                     </div>
-                    <button className="btn btn-outline" onClick={fetchOrders}>
-                        <RefreshCw size={16} /> Actualizar
+                    <button className="btn btn-outline" onClick={fetchOrders} title="Actualizar">
+                        <RefreshCw size={16} />
                     </button>
                 </div>
             </header>
@@ -213,54 +238,46 @@ const Kitchen = () => {
                     <p className="text-secondary mt-4">Cargando órdenes de cocina...</p>
                 </div>
             ) : (
-                <div className="kanban-board">
-                    {/* COLUMNA 1: PREPARANDO */}
-                    <div className="kanban-column">
-                        <div className="kanban-column-header preparing">
-                            <span className="column-dot"></span>
-                            <h2>Preparando</h2>
-                            <span className="column-count">{preparando.length}</span>
+                <div className="kanban-board-single">
+                    {activeTab === 'preparando' ? (
+                        <div className="kanban-column full-width">
+                            <div className="kanban-cards">
+                                {preparando.length === 0 ? (
+                                    <div className="kanban-empty">
+                                        <Package size={48} className="opacity-20 mb-2" />
+                                        <p>No hay órdenes pendientes 🎉</p>
+                                    </div>
+                                ) : preparando.map(order => (
+                                    <OrderCard
+                                        key={order.id}
+                                        order={order}
+                                        showAction={true}
+                                        updatingId={updatingId}
+                                        onMoveToLista={moveToLista}
+                                    />
+                                ))}
+                            </div>
                         </div>
-                        <div className="kanban-cards">
-                            {preparando.length === 0 ? (
-                                <div className="kanban-empty">
-                                    <p>Sin órdenes pendientes 🎉</p>
-                                </div>
-                            ) : preparando.map(order => (
-                                <OrderCard
-                                    key={order.id}
-                                    order={order}
-                                    showAction={true}
-                                    updatingId={updatingId}
-                                    onMoveToLista={moveToLista}
-                                />
-                            ))}
+                    ) : (
+                        <div className="kanban-column full-width">
+                            <div className="kanban-cards">
+                                {listas.length === 0 ? (
+                                    <div className="kanban-empty">
+                                        <Package size={48} className="opacity-20 mb-2" />
+                                        <p>No hay órdenes listas aún</p>
+                                    </div>
+                                ) : listas.map(order => (
+                                    <OrderCard
+                                        key={order.id}
+                                        order={order}
+                                        showAction={false}
+                                        updatingId={updatingId}
+                                        onMoveToLista={moveToLista}
+                                    />
+                                ))}
+                            </div>
                         </div>
-                    </div>
-
-                    {/* COLUMNA 2: LISTA */}
-                    <div className="kanban-column">
-                        <div className="kanban-column-header ready">
-                            <span className="column-dot"></span>
-                            <h2>Lista para Entregar</h2>
-                            <span className="column-count">{listas.length}</span>
-                        </div>
-                        <div className="kanban-cards">
-                            {listas.length === 0 ? (
-                                <div className="kanban-empty">
-                                    <p>Ninguna lista aún</p>
-                                </div>
-                            ) : listas.map(order => (
-                                <OrderCard
-                                    key={order.id}
-                                    order={order}
-                                    showAction={false}
-                                    updatingId={updatingId}
-                                    onMoveToLista={moveToLista}
-                                />
-                            ))}
-                        </div>
-                    </div>
+                    )}
                 </div>
             )}
         </div>
