@@ -65,7 +65,7 @@ const PointOfSale = () => {
     const [sauceOptions, setSauceOptions] = useState<Product[]>([]);
     const [drinkOptions, setDrinkOptions] = useState<Product[]>([]);
     const [selectedSauces, setSelectedSauces] = useState<{ id: string; isExtra: boolean }[]>([]);
-    const [selectedDrink, setSelectedDrink] = useState<string | null>(null);
+    const [selectedDrinks, setSelectedDrinks] = useState<string[]>([]);
     const [isExtraSauceMode, setIsExtraSauceMode] = useState(false);
 
     const { currentUser } = useRole();
@@ -118,7 +118,7 @@ const PointOfSale = () => {
     const openCustomization = (product: Product) => {
         setCustProduct(product);
         setSelectedSauces([]);
-        setSelectedDrink(null);
+        setSelectedDrinks([]);
         setIsExtraSauceMode(false);
 
         // Fetch options if needed
@@ -164,9 +164,9 @@ const PointOfSale = () => {
             }
         });
 
-        // Process drink
-        if (selectedDrink) {
-            const drink = drinkOptions.find(d => d.id === selectedDrink);
+        // Process drinks
+        selectedDrinks.forEach((drinkId) => {
+            const drink = drinkOptions.find(d => d.id === drinkId);
             if (drink) {
                 customs.push({
                     productId: drink.id,
@@ -174,7 +174,7 @@ const PointOfSale = () => {
                     price: 0 // Assume included in combo
                 });
             }
-        }
+        });
 
         addToCart(custProduct, customs);
     };
@@ -451,31 +451,90 @@ const PointOfSale = () => {
                             )}
 
                             {/* Sección de Bebidas */}
-                            {custProduct.includes_drink && (
-                                <div className="cust-section mt-4">
-                                    <h3>Escoge tu Bebida <small>(Incluida)</small></h3>
-                                    <div className="options-grid">
-                                        {drinkOptions.map(drink => (
-                                            <button
-                                                key={drink.id}
-                                                className={`option-btn ${selectedDrink === drink.id ? 'active' : ''}`}
-                                                onClick={() => setSelectedDrink(drink.id)}
-                                            >
-                                                <div className="option-visual">
-                                                    {drink.image_url ? (
-                                                        <img src={drink.image_url} alt="" className="option-img-sm" />
-                                                    ) : (
-                                                        <span className="option-emoji-sm">{drink.image}</span>
-                                                    )}
-                                                </div>
-                                                <div className="option-content">
-                                                    <span className="option-name-sm">{drink.name}</span>
-                                                </div>
-                                            </button>
-                                        ))}
+                            {custProduct.includes_drink && (() => {
+                                const maxDrinks = custProduct.name.toLowerCase().includes('familiar') ? 4 : (custProduct.name.toLowerCase().includes('pareja') ? 2 : 1);
+                                
+                                const addDrink = (id: string) => {
+                                    if (maxDrinks === 1) {
+                                        setSelectedDrinks([id]);
+                                    } else if (selectedDrinks.length < maxDrinks) {
+                                        setSelectedDrinks([...selectedDrinks, id]);
+                                    } else {
+                                        toast.error(`Solo puedes escoger ${maxDrinks} bebidas`, { id: 'max-drinks-toast' });
+                                    }
+                                };
+
+                                const removeDrink = (id: string) => {
+                                    setSelectedDrinks(prev => {
+                                        const idx = prev.indexOf(id);
+                                        if (idx !== -1) {
+                                            const n = [...prev];
+                                            n.splice(idx, 1);
+                                            return n;
+                                        }
+                                        return prev;
+                                    });
+                                };
+
+                                return (
+                                    <div className="cust-section mt-4">
+                                        <div className="flex justify-between items-center mb-4 border-b border-white/5 pb-2">
+                                            <h3>
+                                                Bebidas 
+                                                <small className="text-secondary ml-2 font-normal">
+                                                    (Incluye {maxDrinks})
+                                                </small>
+                                            </h3>
+                                            <span className="text-sm font-bold bg-blue-500/20 text-blue-400 px-3 py-1 rounded-full">
+                                                {selectedDrinks.length} / {maxDrinks}
+                                            </span>
+                                        </div>
+                                        <div className="options-grid">
+                                            {drinkOptions.map(drink => {
+                                                const count = selectedDrinks.filter(id => id === drink.id).length;
+                                                return (
+                                                    <div 
+                                                        key={drink.id} 
+                                                        style={{ position: 'relative' }}
+                                                    >
+                                                        <button
+                                                            className={`option-btn w-full ${count > 0 ? 'active' : ''}`}
+                                                            onClick={() => addDrink(drink.id)}
+                                                        >
+                                                            <div className="option-visual">
+                                                                {drink.image_url ? (
+                                                                    <img src={drink.image_url} alt="" className="option-img-sm" />
+                                                                ) : (
+                                                                    <span className="option-emoji-sm">{drink.image}</span>
+                                                                )}
+                                                                {count > 0 && (
+                                                                    <span 
+                                                                        className="font-bold bg-blue-500 text-white rounded-full px-2 py-0.5 shadow-md"
+                                                                        style={{ position: 'absolute', bottom: '-8px', right: '-8px', fontSize: '0.75rem', zIndex: 5, border: '2px solid var(--panel-bg)' }}
+                                                                    >
+                                                                        {count}x
+                                                                    </span>
+                                                                )}
+                                                            </div>
+                                                            <div className="option-content">
+                                                                <span className="option-name-sm">{drink.name}</span>
+                                                            </div>
+                                                        </button>
+                                                        {count > 0 && maxDrinks > 1 && (
+                                                            <button 
+                                                                onClick={(e) => { e.stopPropagation(); removeDrink(drink.id); }} 
+                                                                style={{ position: 'absolute', top: '-8px', right: '-8px', background: '#ef4444', color: 'white', borderRadius: '50%', width: '28px', height: '28px', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 10, boxShadow: '0 2px 5px rgba(0,0,0,0.5)', border: '2px solid var(--panel-bg)' }}
+                                                            >
+                                                                <Minus size={16} />
+                                                            </button>
+                                                        )}
+                                                    </div>
+                                                );
+                                            })}
+                                        </div>
                                     </div>
-                                </div>
-                            )}
+                                );
+                            })()}
                         </div>
 
                         <div className="modal-footer-cust mt-6">
