@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
+import { createPortal } from 'react-dom';
 import {
     Plus, Pencil, Trash2, Loader2, X, Save,
     Tag, DollarSign, FileText, Utensils, Search, ToggleLeft, ToggleRight,
@@ -28,7 +29,7 @@ interface Category {
     display_order: number;
 }
 
-const EMOJI_OPTIONS = ['🍔', '🌮', '🍕', '🍣', '🥪', '🍟', '🥤', '☕', '🧃', '🍰', '🍗', '🥗', '🍝', '🌯', '💧', '🧊', '🧋', '🍷', '🍺', '🥩'];
+const EMOJI_OPTIONS = ['🍎', '🍊', '🍋', '🍟', '🥤', '🍗', '💧', '🧊'];
 
 const emptyForm = (): Omit<Product, 'id'> => ({
     name: '',
@@ -396,7 +397,7 @@ const MenuManager = () => {
             )}
 
             {/* PRODUCT MODAL */}
-            {showModal && (
+            {showModal && createPortal(
                 <div className="modal-overlay" onClick={e => { if (e.target === e.currentTarget) closeModal(); }}>
                     <div className="modal-content glass-panel menu-modal animate-fade-in">
                         <div className="modal-header">
@@ -592,7 +593,8 @@ const MenuManager = () => {
                             </button>
                         </div>
                     </div>
-                </div>
+                </div>,
+                document.body
             )}
         </div>
     );
